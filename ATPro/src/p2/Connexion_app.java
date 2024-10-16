@@ -4,12 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Connexion_app {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-		// Créer la fenêtre principale
+    public static void main(String[] args) {
+        // Créer la fenêtre principale
         JFrame frame = new JFrame("Page_Connexion");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 500);
@@ -21,7 +24,7 @@ public class Connexion_app {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
         // Avatar
-        ImageIcon avatarIcon = new ImageIcon("C:\\Users\\alexl\\Desktop\\Cours BTS 2ème année\\Ap pro\\Partie_2\\Icon_Connexion.png"); // Ajoutez votre propre image ici
+        ImageIcon avatarIcon = new ImageIcon("C:\\Users\\alexl\\Desktop\\Cours BTS 2ème année\\Ap pro\\Partie_2\\Icon_Connexion.png");
         JLabel avatarLabel = new JLabel(avatarIcon);
         avatarLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(avatarLabel);
@@ -83,9 +86,18 @@ public class Connexion_app {
                     valid = false;
                 }
 
-                // Si tous les champs sont valides
+                // Si tous les champs sont valides, vérifier dans la base de données
                 if (valid) {
-                    JOptionPane.showMessageDialog(frame, "Connexion réussie !");
+                    String identifiant = identifiantField.getText().trim();
+                    String password = new String(passwordField.getPassword()).trim();
+
+                    if (verifierIdentifiantsDansBDD(identifiant, password)) {
+                        JOptionPane.showMessageDialog(frame, "Connexion réussie !");
+                        // Accéder à la page d'accueil (par exemple, ouvrir une nouvelle fenêtre)
+                        ouvrirPageAccueil();
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Erreur : Identifiant ou mot de passe incorrect.", "Erreur de connexion", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
@@ -97,5 +109,45 @@ public class Connexion_app {
 
         // Rendre la fenêtre visible
         frame.setVisible(true);
+    }
+
+    // Méthode pour vérifier les identifiants dans la base de données
+    private static boolean verifierIdentifiantsDansBDD(String identifiant, String password) {
+        boolean connexionReussie = false;
+
+        // Requête SQL pour vérifier les identifiants
+        String query = "SELECT * FROM salarie WHERE identifiant = ? AND motDePasse = ?";
+
+        // Utiliser la méthode getConnection() de Connexion_BDD pour obtenir la connexion
+        try (Connection conn = Connexion_BDD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Assigner les valeurs saisies aux paramètres de la requête
+            stmt.setString(1, identifiant);
+            stmt.setString(2, password);
+
+            // Exécuter la requête
+            ResultSet rs = stmt.executeQuery();
+
+            // Si une correspondance est trouvée, la connexion est réussie
+            if (rs.next()) {
+                connexionReussie = true;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return connexionReussie;
+    }
+
+    // Méthode pour ouvrir la page d'accueil (simple exemple)
+    private static void ouvrirPageAccueil() {
+        JFrame accueilFrame = new JFrame("Page d'accueil");
+        accueilFrame.setSize(400, 400);
+        JLabel label = new JLabel("Bienvenue sur la page d'accueil !");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        accueilFrame.add(label);
+        accueilFrame.setVisible(true);
     }
 }
