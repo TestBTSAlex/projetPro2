@@ -11,9 +11,10 @@ import java.sql.SQLException;
 
 public class Connexion_app {
 
-    public static void main(String[] args) {
-        // Créer la fenêtre principale
-        JFrame frame = new JFrame("Page_Connexion");
+    // Méthode principale pour afficher la fenêtre de connexion
+    public void afficherFenetreConnexion() {
+        // Créer la fenêtre principale de connexion
+        JFrame frame = new JFrame("Page de Connexion");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 500);
         frame.setLayout(new BorderLayout());
@@ -91,10 +92,11 @@ public class Connexion_app {
                     String identifiant = identifiantField.getText().trim();
                     String password = new String(passwordField.getPassword()).trim();
 
+                    // Vérifier les identifiants dans la base de données
                     if (verifierIdentifiantsDansBDD(identifiant, password)) {
                         JOptionPane.showMessageDialog(frame, "Connexion réussie !");
-                        // Accéder à la page d'accueil (par exemple, ouvrir une nouvelle fenêtre)
-                        ouvrirPageAccueil();
+                        MainApp.afficherFenetreAccueil(identifiant); // Ouvre la fenêtre d'accueil
+                        frame.dispose(); // Ferme la fenêtre de connexion
                     } else {
                         JOptionPane.showMessageDialog(frame, "Erreur : Identifiant ou mot de passe incorrect.", "Erreur de connexion", JOptionPane.ERROR_MESSAGE);
                     }
@@ -112,7 +114,7 @@ public class Connexion_app {
     }
 
     // Méthode pour vérifier les identifiants dans la base de données
-    private static boolean verifierIdentifiantsDansBDD(String identifiant, String password) {
+    private boolean verifierIdentifiantsDansBDD(String identifiant, String password) {
         boolean connexionReussie = false;
 
         // Requête SQL pour vérifier les identifiants
@@ -139,15 +141,5 @@ public class Connexion_app {
         }
 
         return connexionReussie;
-    }
-
-    // Méthode pour ouvrir la page d'accueil (simple exemple)
-    private static void ouvrirPageAccueil() {
-        JFrame accueilFrame = new JFrame("Page d'accueil");
-        accueilFrame.setSize(400, 400);
-        JLabel label = new JLabel("Bienvenue sur la page d'accueil !");
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        accueilFrame.add(label);
-        accueilFrame.setVisible(true);
     }
 }
